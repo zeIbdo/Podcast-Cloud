@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Podcast.BLL.Services.Contracts;
 using Podcast.BLL.ViewModels.EpisodeViewModels;
 using Podcast.DAL.DataContext.Entities;
@@ -15,6 +17,7 @@ public class EpisodeManager : CrudManager<Episode, EpisodeViewModel, EpisodeCrea
     private readonly IMapper _mapper;
     private readonly IRepositoryAsync<Episode> _repository;
 
+    
     public EpisodeManager(IRepositoryAsync<Episode> repository, IMapper mapper, ISpeakerService speakerService, ITopicService topicService, ICloudinaryService cloudinaryService) : base(repository, mapper)
     {
         _speakerService = speakerService;
@@ -24,6 +27,30 @@ public class EpisodeManager : CrudManager<Episode, EpisodeViewModel, EpisodeCrea
         _repository = repository;
     }
 
+    public async Task<EpisodeViewModel> IncrementDownloadCount(int id)
+    {
+        var entity = await _repository.GetAsync(id);        
+        entity.DownloadCount++;
+        var episode = await _repository.UpdateAsync(entity);
+        var vm  = _mapper.Map<EpisodeViewModel>(episode);
+        return vm;
+    }
+    public async Task<EpisodeDetailViewModel> UniqueId(string id)
+    {
+        var id1 = int.Parse(id.Substring(id.IndexOf('#') + 1));
+
+        var vm = await GetAsync(x => x.Id == id1, include: x => x.Include(y => y.Speaker!).Include(y => y.Topic!));
+        var viewModels = await _repository.GetListAsync();
+        List<EpisodeViewModel> list = new List<EpisodeViewModel>(); 
+        foreach(var item in viewModels.Take(3))
+        {
+            EpisodeViewModel episodeViewModel = new EpisodeViewModel();
+            list.Add(_mapper.Map(item, episodeViewModel));
+        }
+        EpisodeDetailViewModel viewModel = new() { MainViewModel = vm ,Episodes= list};
+        
+        return viewModel;
+    }
     public async Task<EpisodeCreateViewModel> GetEpisodeCreateViewModelAsync(EpisodeCreateViewModel model)
     {
         var speakerList = await _speakerService.GetListAsync();

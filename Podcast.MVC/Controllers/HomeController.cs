@@ -1,7 +1,9 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Podcast.BLL.Services.Contracts;
 using Podcast.BLL.UI.Services.Contracts;
+using Podcast.BLL.ViewModels.EpisodeViewModels;
 using Podcast.BLL.ViewModels.SpeakerProfessionViewModels;
 using Podcast.BLL.ViewModels.SpeakerViewModels;
 
@@ -15,7 +17,8 @@ namespace Podcast.MVC.Controllers
         private readonly ISpeakerProfessionService _speakerProfessionService;
         private readonly IAudioService _audioService;
         private readonly IEpisodeService _episodeService;
-        public HomeController(IHomeService homeService, IWebHostEnvironment webHostEnvironment, ISpeakerService speakerService, ISpeakerProfessionService speakerProfessionService, IAudioService audioService, IEpisodeService episodeService)
+        private readonly IMapper _mapper;
+        public HomeController(IHomeService homeService, IWebHostEnvironment webHostEnvironment, ISpeakerService speakerService, ISpeakerProfessionService speakerProfessionService, IAudioService audioService, IEpisodeService episodeService, IMapper mapper)
         {
             _homeService = homeService;
             _webHostEnvironment = webHostEnvironment;
@@ -23,6 +26,7 @@ namespace Podcast.MVC.Controllers
             _speakerProfessionService = speakerProfessionService;
             _audioService = audioService;
             _episodeService = episodeService;
+            _mapper = mapper;
         }
 
         public async Task<IActionResult> Index()
@@ -31,12 +35,11 @@ namespace Podcast.MVC.Controllers
 
             return  View(viewModel);
         }
-        public async Task<IActionResult> DetailPage(string name)
+        public async Task<IActionResult> DetailPage(string id)
         {
-            if (String.IsNullOrEmpty(name)) return NotFound();
-            var id =int.Parse(name.Substring(name.IndexOf('#')+1));
+            if (String.IsNullOrEmpty(id)) return NotFound();
 
-            var vm = await _episodeService.GetAsync(x => x.Id==id, include: x => x.Include(y => y.Speaker!).Include(y => y.Topic!));
+            var vm = await _episodeService.UniqueId(id);
             return View(vm);
         }
         public async Task<IActionResult> Download(int? id)
@@ -50,6 +53,11 @@ namespace Podcast.MVC.Controllers
             //var fileResult = _homeService.DownloadWithFileContent();
 
             //return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileDownloadName);
+        }
+        public async Task<IActionResult> DownloadInc(int id)
+        {
+            var vm =await _episodeService.IncrementDownloadCount(id);
+            return RedirectToAction(nameof(Index));
         }
 
 

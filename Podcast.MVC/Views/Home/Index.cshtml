@@ -101,7 +101,7 @@
                         </div>
 
                         <h5 class="mb-2">
-                                <a asp-controller="home" asp-action="detailpage" asp-route-id="@item.Id" asp-route-name="@(item.Title + "#" + item.Id)">
+                                <a asp-controller="home" asp-action="detailpage" asp-route-id="@(item.Title + "#" + item.Id)">
                                 @item.Title
                             </a>
                         </h5>
@@ -131,7 +131,7 @@
                                 <span>11k</span>
                             </a>
 
-                            <a asp-controller="home" asp-action="download" asp-route-id="@item.Id" class="bi-download">
+                            <a asp-controller="home" asp-action="downloadinc" asp-route-id="@item.Id" class="bi-download" id="12ibo">
                                 <span>@item.DownloadCount</span>
                             </a>
                         </div>

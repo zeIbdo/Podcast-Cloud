@@ -8,4 +8,7 @@ public interface IEpisodeService : ICrudService<Episode, EpisodeViewModel, Episo
 {
     Task<EpisodeCreateViewModel> GetEpisodeCreateViewModelAsync(EpisodeCreateViewModel model);
     Task<EpisodeUpdateViewModel> GetEpisodeUpdateViewModelAsync(int id);
+     Task<EpisodeViewModel> IncrementDownloadCount(int id);
+    Task<EpisodeDetailViewModel> UniqueId(string id);
+
 }
