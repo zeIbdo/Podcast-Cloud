@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Podcast.BLL.Services.Contracts;
 using Podcast.BLL.UI.Services.Contracts;
 using Podcast.BLL.ViewModels.SpeakerProfessionViewModels;
@@ -13,14 +14,15 @@ namespace Podcast.MVC.Controllers
         private readonly ISpeakerService _speakerService;
         private readonly ISpeakerProfessionService _speakerProfessionService;
         private readonly IAudioService _audioService;
-
-        public HomeController(IHomeService homeService, IWebHostEnvironment webHostEnvironment, ISpeakerService speakerService, ISpeakerProfessionService speakerProfessionService, IAudioService audioService)
+        private readonly IEpisodeService _episodeService;
+        public HomeController(IHomeService homeService, IWebHostEnvironment webHostEnvironment, ISpeakerService speakerService, ISpeakerProfessionService speakerProfessionService, IAudioService audioService, IEpisodeService episodeService)
         {
             _homeService = homeService;
             _webHostEnvironment = webHostEnvironment;
             _speakerService = speakerService;
             _speakerProfessionService = speakerProfessionService;
             _audioService = audioService;
+            _episodeService = episodeService;
         }
 
         public async Task<IActionResult> Index()
@@ -29,7 +31,14 @@ namespace Podcast.MVC.Controllers
 
             return  View(viewModel);
         }
+        public async Task<IActionResult> DetailPage(string name)
+        {
+            if (String.IsNullOrEmpty(name)) return NotFound();
+            var id =int.Parse(name.Substring(name.IndexOf('#')+1));
 
+            var vm = await _episodeService.GetAsync(x => x.Id==id, include: x => x.Include(y => y.Speaker!).Include(y => y.Topic!));
+            return View(vm);
+        }
         public async Task<IActionResult> Download(int? id)
         {
             if (id == null) return NotFound();

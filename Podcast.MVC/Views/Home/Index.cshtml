@@ -101,7 +101,7 @@
                         </div>
 
                         <h5 class="mb-2">
-                            <a href="detail-page.html">
+                                <a asp-controller="home" asp-action="detailpage" asp-route-id="@item.Id" asp-route-name="@(item.Title + "#" + item.Id)">
                                 @item.Title
                             </a>
                         </h5>
